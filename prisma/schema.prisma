@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String    @unique
+  email             String    @unique @db.Text()
+  password          String    // for bcrypt
+
+  profileUrl        String?
+  role              String
+
+  isEmailVerified   Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  isDeleted         Boolean   @default(false)
+
+  createdAt         DateTime  @default(now())
+  createdBy         Int?
+  updatedAt         DateTime  @updatedAt
+  updatedBy         Int?
+
+  tokens            Token[]   // relation
+}
+
+model Token {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  accessToken       String    @unique
+  refreshToken      String    @unique
+  expiresAt         DateTime
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id])
+}
