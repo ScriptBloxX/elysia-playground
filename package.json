@@ -8,6 +8,7 @@
     "remove-route": "bun run ./src/auto/remove-route.ts"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.1.0",
     "@elysiajs/swagger": "^1.1.0",
     "@prisma/client": "^5.18.0",
     "elysia": "^1.1.5",
