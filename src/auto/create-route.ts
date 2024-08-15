@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, appendFileSync, readFileSync } from "fs";
 import { join } from "path";
 
 // Get the route name from the command line arguments
@@ -31,13 +31,13 @@ const indexPath = join(routeFolderPath, "index.ts");
 const modelPath = join(routeFolderPath, "model.ts");
 const servicePath = join(routeFolderPath, "service.ts");
 
-
+// Content for the route files
 const indexContent = 
 `import Elysia from "elysia";
 import { Create, Read, ReadAll, Update, Delete } from "./service";
 import { Model } from "./model";
 
-export default new Elysia({prefix: '/test'})
+export default new Elysia({prefix: '/${routeName}'})
     .use(Model)
     .get('/', (params) => ReadAll(params), {})
     .get('/:id', (params) => Read(params), {})
@@ -45,6 +45,7 @@ export default new Elysia({prefix: '/test'})
     .patch('/', (params) => Update(params), {})
     .delete('/', (params) => Delete(params), {});
 `;
+
 const modelContent = 
 `import { Elysia, t } from 'elysia'
 
@@ -54,8 +55,8 @@ export const Model = new Elysia()
             key: t.String(),
         })
     })
-
 `;
+
 const serviceContent = 
 `export async function Create(params:any) {
     return 'hello create'
@@ -80,3 +81,28 @@ writeFileSync(modelPath, modelContent);
 writeFileSync(servicePath, serviceContent);
 
 console.log(`${greenText}Route ${yellowText}"${routeName}"${greenText} created successfully with index.ts, model.ts, and service.ts files.${resetText}`);
+
+// Path to the main index.ts file
+const mainIndexPath = join(__dirname, "../index.ts");
+
+// Read the current content of the main index.ts
+let mainIndexContent = readFileSync(mainIndexPath, 'utf-8');
+
+// Add the import statement at the top of the main index.ts
+const importStatement = `import ${routeName}Route from './routes/${routeName}';\n`;
+
+if (!mainIndexContent.includes(importStatement)) {
+    mainIndexContent = importStatement + mainIndexContent;
+}
+
+// Add the .group() statement at the bottom of the main index.ts
+const groupStatement = `\n    .group('/api', (app) => app.use(${routeName}Route))`;
+
+if (!mainIndexContent.includes(groupStatement)) {
+    mainIndexContent = mainIndexContent.trim() + groupStatement + '\n';
+}
+
+// Write the updated content back to the main index.ts
+writeFileSync(mainIndexPath, mainIndexContent);
+
+console.log(`${greenText}Updated main index.ts with the new route ${yellowText}"${routeName}"${greenText}.${resetText}`);
