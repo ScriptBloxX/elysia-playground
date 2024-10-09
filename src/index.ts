@@ -11,8 +11,8 @@ app
 .listen(3000,()=>console.log(`server is runnnig at: http://localhost:${3000}/`))
     .use(cors())
     .use(rateLimit({
-        duration: 3000,
-        max: 1,
+        duration: 1000,
+        max: 10,
         errorResponse: new Response("Rate limit reached", {
             status: 429,
             headers: new Headers({
