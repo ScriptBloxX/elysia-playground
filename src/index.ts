@@ -1,5 +1,5 @@
-import userRoute from './routes/user'
-import { Elysia, t } from 'elysia'
+import userRoute from './routes/user';
+import { Elysia, t } from 'elysia';
 import { swagger } from "@elysiajs/swagger";
 import cors from '@elysiajs/cors';
 import { rateLimit } from 'elysia-rate-limit';
