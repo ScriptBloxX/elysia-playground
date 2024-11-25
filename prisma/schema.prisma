@@ -11,7 +11,7 @@ model User {
   id                Int       @id @default(autoincrement())
   username          String    @unique
   email             String    @unique @db.Text()
-  password          String    // for bcrypt
+  password          String    // String for bcrypt
 
   profileUrl        String?
   role              String
