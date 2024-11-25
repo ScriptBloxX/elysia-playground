@@ -33,7 +33,16 @@ export async function hashCompare(plainText: string, hashed: string): Promise<bo
         throw new Error('Error comparing hash: ' + err.message);
     }
 }
-export function validateEmailFormat(email: string): boolean {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
+export function validateEmailFormat(email: string): void {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) throw new Error('Invalid email format');    
+}
+
+export function validateUsername(username: string): void {
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+    if (!usernameRegex.test(username)) throw new Error('Username must be between 3 and 20 characters and can only contain letters, numbers, hyphens, and underscores.');
+}
+export function validatePassword(password: string): void {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+    if (!passwordRegex.test(password)) throw new Error('Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
 }

@@ -1,9 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { validateEmailFormat } from "../../core/Helper";
+import { validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
 
-export async function Create(params:any) {
-    console.log(params)
-    return (params)
+export async function Create(body:any) {
+    validateEmailFormat(body.email);
+    validateUsername(body.username);
+    validatePassword(body.password);
+    return (body)
 }
 export async function Read() {
     return 'Hello Read'
