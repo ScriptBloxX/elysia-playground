@@ -15,7 +15,7 @@ async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<
 
 export default executeWithPrisma;
 
-export async function Hash(plainTextPassword: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
+export async function hash(plainTextPassword: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
     try {
         const salt = await bcrypt.genSalt(saltRounds)
         const hashedPassword = await bcrypt.hash(plainTextPassword, salt)
@@ -25,7 +25,7 @@ export async function Hash(plainTextPassword: string, saltRounds: number = 12, m
     }
 }
 
-export async function HashCompare(plainText: string, hashed: string): Promise<boolean> {
+export async function hashCompare(plainText: string, hashed: string): Promise<boolean> {
     try {
         const isMatch = await bcrypt.compare(plainText, hashed);
         return isMatch; 
@@ -33,4 +33,7 @@ export async function HashCompare(plainText: string, hashed: string): Promise<bo
         throw new Error('Error comparing hash: ' + err.message);
     }
 }
-
+export function validateEmailFormat(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
