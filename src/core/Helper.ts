@@ -1,5 +1,6 @@
-const bcrypt = require('bcrypt');
 import { PrismaClient } from "@prisma/client";
+import nodemailer, { SentMessageInfo } from 'nodemailer';
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
@@ -66,4 +67,32 @@ export function validateThaiIdCard(idCard: string): void {
     if (checksum !== digits[12]) {
         throw new Error('Invalid ID card: checksum does not match.');
     }
+}
+
+export async function sendEmail(to: string, option: {subject: string,html:string}): Promise<boolean> {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env['SERVER_MAIL_USERNAME'],
+            pass: process.env['SERVER_MAIL_PASSWORD']
+        }
+    });
+
+    const mailOptions = {
+        from: process.env['SERVER_MAIL_USERNAME'],
+        to: to,
+        subject: option.subject,
+        html: option.html
+    };
+
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (err: Error | null, info: SentMessageInfo) => {
+            if (err) {
+                throw new Error(`Email sending failed: ${err.message}`);
+            } else {
+                // console.log('Email sent:', info.response);
+                resolve(true);
+            }
+        });
+    });
 }

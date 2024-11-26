@@ -11,9 +11,11 @@
     "@elysiajs/cors": "^1.1.0",
     "@elysiajs/swagger": "^1.1.0",
     "@prisma/client": "^5.18.0",
+    "@types/nodemailer": "^6.4.17",
     "bcrypt": "^5.1.1",
     "elysia": "^1.1.5",
     "elysia-rate-limit": "^4.1.0",
+    "nodemailer": "^6.9.16",
     "prisma": "^5.18.0"
   },
   "devDependencies": {
