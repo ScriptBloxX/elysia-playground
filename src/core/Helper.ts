@@ -7,7 +7,6 @@ const {initializeApp} = require('firebase/app')
 
 const prisma = new PrismaClient();
 
-const admin = require("firebase-admin");
 const serviceAccount = {
     type: process.env['auth_provider_x509_cert_url'],
     project_id: process.env['project_id'],
