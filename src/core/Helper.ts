@@ -46,3 +46,24 @@ export function validatePassword(password: string): void {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
     if (!passwordRegex.test(password)) throw new Error('Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
 }
+
+export function validateThaiIdCard(idCard: string): void {
+    if (!/^\d{13}$/.test(idCard)) {
+        throw new Error('Invalid ID card format. It should be exactly 13 digits.');
+    }
+
+    const digits = idCard.split('').map(Number);
+    const weights = [13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum = 0;
+
+    for (let i = 0; i < 12; i++) {
+        sum += digits[i] * weights[i];
+    }
+
+    const remainder = sum % 11;
+    const checksum = (11 - remainder) % 10;
+
+    if (checksum !== digits[12]) {
+        throw new Error('Invalid ID card: checksum does not match.');
+    }
+}
