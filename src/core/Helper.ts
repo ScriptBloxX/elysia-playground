@@ -1,8 +1,28 @@
 import { PrismaClient } from "@prisma/client";
 import nodemailer, { SentMessageInfo } from 'nodemailer';
+import { v4 as uuidv4 } from 'uuid';
 const bcrypt = require('bcrypt');
+const {getStorage, ref, getDownloadURL,uploadBytesResumable} = require('firebase/storage')
+const {initializeApp} = require('firebase/app')
 
 const prisma = new PrismaClient();
+
+const admin = require("firebase-admin");
+const serviceAccount = {
+    type: process.env['auth_provider_x509_cert_url'],
+    project_id: process.env['project_id'],
+    private_key_id: process.env['private_key_id'],
+    private_key: process.env['private_key'],
+    client_email: process.env['client_email'],
+    client_id: process.env['client_id'],
+    auth_uri: process.env['auth_uri'],
+    token_uri: process.env['token_uri'],
+    auth_provider_x509_cert_url: process.env['auth_provider_x509_cert_url'],
+    client_x509_cert_url: process.env['client_x509_cert_url'],
+    storageBucket:process.env['storageBucket']
+}
+
+initializeApp(serviceAccount);
 
 async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<T>): Promise<T> {
     let result: T;
@@ -95,4 +115,41 @@ export async function sendEmail(to: string, option: {subject: string,html:string
             }
         });
     });
+}
+
+interface File {
+  originalname: string;
+  mimetype: string;
+  buffer: Buffer;
+}
+interface UploadResponse {
+  downloadURLs: string[];
+}
+
+export async function fileUpload(files: File[] | undefined,RandomName?: boolean,CustomName?: string): Promise<UploadResponse> {
+    
+  if (!files) throw new Error('File missing');
+  if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+
+  const storage = getStorage();
+  const downloadURLs: string[] = [];
+
+  const uploadPromises = files.map(async (element) => {
+    const storageRef = ref(
+      storage,
+      `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
+    );
+
+    const metadata = { contentType: element.mimetype };
+
+    const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    downloadURLs.push(downloadURL);
+    return downloadURLs;
+  });
+
+  await Promise.all(uploadPromises);
+
+  return { downloadURLs };
 }
