@@ -16,6 +16,7 @@
     "elysia": "^1.1.5",
     "elysia-rate-limit": "^4.1.0",
     "firebase": "^11.0.2",
+    "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.16",
     "prisma": "^5.18.0"
   },

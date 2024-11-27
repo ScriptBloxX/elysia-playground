@@ -8,6 +8,6 @@ export default new Elysia({prefix: '/user'})
     .onBeforeHandle(mw) //midleware example
     .get('/',()=> ReadAll())
     .get('/:id',()=> Read())
-    .post('/',({body})=> Create(body),{body: 'create',response: 'create'})
+    .post('/',({body})=>Create(body),{body: 'createReq',response: 'createRes'})
     .patch('/',()=> Update())
     .delete('/',()=> Delete())

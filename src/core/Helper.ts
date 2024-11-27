@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
+import jwt from "jsonwebtoken";
 const bcrypt = require('bcrypt');
 const {getStorage, ref, getDownloadURL,uploadBytesResumable} = require('firebase/storage')
 const {initializeApp} = require('firebase/app')
@@ -128,7 +129,7 @@ interface UploadResponse {
 export async function fileUpload(files: File[] | undefined,RandomName?: boolean,CustomName?: string): Promise<UploadResponse> {
     if (!files) throw new Error('File missing');
     if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
-    console.log(files," in core")
+    
     const storage = getStorage();
     const downloadURLs: string[] = [];
 
@@ -151,3 +152,11 @@ export async function fileUpload(files: File[] | undefined,RandomName?: boolean,
 
     return { downloadURLs };
 }
+
+export async function generateAccessToken (userId: number,username:string,role:string) {
+    return jwt.sign({ userId,username,role }, process.env.JWT_SECRET || "No-Way-Null_Secret", { expiresIn: "3h" });
+};
+
+export async function generateRefreshToken (userId: number,username:string,role:string) {
+    return jwt.sign({ userId,username,role }, process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret", { expiresIn: "7d" });
+};

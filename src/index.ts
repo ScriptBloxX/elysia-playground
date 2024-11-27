@@ -1,3 +1,4 @@
+import authenticationRoute from './routes/authentication';
 import userRoute from './routes/user';
 import { Elysia, t } from 'elysia';
 import { swagger } from "@elysiajs/swagger";
@@ -23,4 +24,4 @@ app
     }),)
     // # ↘ Please don't edit this manually ↙ //
     .group('/api',(app)=>app.use(userRoute))
-    
+    .group('/api', (app) => app.use(authenticationRoute))
