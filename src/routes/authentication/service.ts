@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import { generateAccessToken, generateRefreshToken, hashCompare } from "../../core/Helper";
+import { generateAccessToken, generateRefreshToken, hashCompare, verifyRefreshToken } from "../../core/Helper";
 
 export async function Login(body: any) {
     const { usernameOrEmail, password } = body
@@ -39,4 +39,28 @@ export async function Login(body: any) {
         role: user.role,
         profileUrl: user.profileUrl
     };
+}
+
+export async function RefreshToken(body: any) {
+    const { refreshToken } = body;
+    const prisma = new PrismaClient();
+
+    const tokenRecord = await prisma.token.findFirst({
+        where: { refreshToken }
+    });
+
+    if (!tokenRecord) throw new Error('Invalid refresh token');
+
+    const user = await prisma.user.findUnique({
+        where: { id: tokenRecord.userId }
+    });
+
+    if (!user) throw new Error('User not found');
+
+    const isValidRefreshToken = await verifyRefreshToken(refreshToken, user.id);
+    if (!isValidRefreshToken) throw new Error('Invalid refresh token');
+
+    const newAccessToken = await generateAccessToken(user.id, user.username, user.role);
+
+    return { accessToken: newAccessToken };
 }

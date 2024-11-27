@@ -22,6 +22,9 @@ const serviceAccount = {
     storageBucket:process.env['storageBucket']
 }
 
+const JWT_SECRET = process.env.JWT_SECRET || "No-Way-Null_Secret"
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret"
+
 initializeApp(serviceAccount);
 
 async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<T>): Promise<T> {
@@ -154,9 +157,28 @@ export async function fileUpload(files: File[] | undefined,RandomName?: boolean,
 }
 
 export async function generateAccessToken (userId: number,username:string,role:string) {
-    return jwt.sign({ userId,username,role }, process.env.JWT_SECRET || "No-Way-Null_Secret", { expiresIn: "3h" });
+    return jwt.sign({ userId,username,role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });
 };
 
 export async function generateRefreshToken (userId: number) {
-    return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret", { expiresIn: "7d" });
+    return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_TIME });
 };
+
+export async function verifyAccessToken(token: string) {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid or expired token');
+    }
+}
+
+export async function verifyRefreshToken(refreshToken: string, userId: number) {
+    try {
+        const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as any;
+        if (decoded.userId !== userId) throw new Error('Token does not match the user');
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid or expired refresh token');
+    }
+}
