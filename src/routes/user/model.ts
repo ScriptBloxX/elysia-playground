@@ -6,6 +6,10 @@ export const Model = new Elysia()
             username: t.String(),
             password: t.String(),
             email: t.String(),
-        })
+        }),
     })
+
+    // file_: t.Object({
+    //     image: t.File()
+    // })
 

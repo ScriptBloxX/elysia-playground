@@ -35,10 +35,10 @@ async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<
 
 export default executeWithPrisma;
 
-export async function hash(plainTextPassword: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
+export async function hash(plainText: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
     try {
         const salt = await bcrypt.genSalt(saltRounds)
-        const hashedPassword = await bcrypt.hash(plainTextPassword, salt)
+        const hashedPassword = await bcrypt.hash(plainText, salt)
         return hashedPassword
     } catch (err) {
         throw new Error('Error hashing password: ')
@@ -117,38 +117,37 @@ export async function sendEmail(to: string, option: {subject: string,html:string
 }
 
 interface File {
-  originalname: string;
-  mimetype: string;
-  buffer: Buffer;
+    originalname: string;
+    mimetype: string;
+    buffer: Buffer;
 }
 interface UploadResponse {
-  downloadURLs: string[];
+    downloadURLs: string[];
 }
 
 export async function fileUpload(files: File[] | undefined,RandomName?: boolean,CustomName?: string): Promise<UploadResponse> {
-    
-  if (!files) throw new Error('File missing');
-  if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+    if (!files) throw new Error('File missing');
+    if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+    console.log(files," in core")
+    const storage = getStorage();
+    const downloadURLs: string[] = [];
 
-  const storage = getStorage();
-  const downloadURLs: string[] = [];
-
-  const uploadPromises = files.map(async (element) => {
+    const uploadPromises = files.map(async (element) => {
     const storageRef = ref(
-      storage,
-      `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
+        storage,
+        `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
     );
 
     const metadata = { contentType: element.mimetype };
 
     const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
     const downloadURL = await getDownloadURL(snapshot.ref);
-    
+
     downloadURLs.push(downloadURL);
     return downloadURLs;
-  });
+    });
 
-  await Promise.all(uploadPromises);
+    await Promise.all(uploadPromises);
 
-  return { downloadURLs };
+    return { downloadURLs };
 }
