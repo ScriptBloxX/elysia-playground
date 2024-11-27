@@ -157,7 +157,9 @@ export async function fileUpload(files: File[] | undefined,RandomName?: boolean,
 }
 
 export async function generateAccessToken (userId: number,username:string,role:string) {
-    return jwt.sign({ userId,username,role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });
+    const _test = jwt.sign({ userId,username,role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });
+    console.log(_test,'test')
+    return _test;
 };
 
 export async function generateRefreshToken (userId: number) {

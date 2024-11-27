@@ -72,6 +72,7 @@ export async function ReadAll() {
     return result
 }
 export async function Update() {
+    console.log('print')
     return 'Hello Update'
 }
 export async function Delete() {
