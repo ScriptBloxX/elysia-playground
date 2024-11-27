@@ -12,7 +12,10 @@ export const Model = new Elysia()
             username: t.String(),
             email: t.String({format:"email"}),
             token: t.String(),
-            refreshToken: t.String()
+            refreshToken: t.String(),
+            isEmailVerified: t.Boolean(),
+            role: t.String(),
+            profileUrl: t.String(),
         })
     })
 

@@ -32,7 +32,8 @@ export async function Create(body:any) {
             email: body.email,
             password: hashedPassword,
             role: body.role || "user",
-            isEmailVerified: false, 
+            isEmailVerified: false,
+            profileUrl: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
             isActive: true,         
             isDeleted: false,       
             createdBy: body.createdBy || null,
@@ -54,7 +55,10 @@ export async function Create(body:any) {
         username: user.username,
         email: user.email,
         token: tk,
-        refreshToken: rftk
+        refreshToken: rftk,
+        isEmailVerified: user.isEmailVerified,
+        role: user.role,
+        profileUrl: user.profileUrl || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
     };
 }
 export async function Read() {

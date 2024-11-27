@@ -6,6 +6,6 @@ export default new Elysia({prefix: '/authentication'})
     .use(Model)
     .get('/', (params) => ReadAll(params), {})
     .get('/:id', (params) => Read(params), {})
-    .post('/', (params) => Create(params), {})
+    .post('/login', ({body}) => Create(body), {})
     .patch('/', (params) => Update(params), {})
     .delete('/', (params) => Delete(params), {});

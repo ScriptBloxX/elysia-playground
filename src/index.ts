@@ -25,3 +25,4 @@ app
     // # ↘ Please don't edit this manually ↙ //
     .group('/api',(app)=>app.use(userRoute))
     .group('/api', (app) => app.use(authenticationRoute))
+    
