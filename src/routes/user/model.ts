@@ -15,7 +15,7 @@ export const Model = new Elysia()
             refreshToken: t.String(),
             isEmailVerified: t.Boolean(),
             role: t.String(),
-            profileUrl: t.String(),
+            profileUrl: t.Nullable(t.String()),
         })
     })
 

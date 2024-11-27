@@ -58,7 +58,7 @@ export async function Create(body:any) {
         refreshToken: refreshToken,
         isEmailVerified: user.isEmailVerified,
         role: user.role,
-        profileUrl: user.profileUrl || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
+        profileUrl: user.profileUrl,
     };
 }
 export async function Read() {
