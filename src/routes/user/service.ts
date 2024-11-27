@@ -40,13 +40,13 @@ export async function Create(body:any) {
         },
     });
 
-    const tk = await generateAccessToken(user.id,user.username,user.role);
-    const rftk = await generateRefreshToken(user.id,user.username,user.role)
+    const accessToken = await generateAccessToken(user.id,user.username,user.role);
+    const refreshToken = await generateRefreshToken(user.id)
     await prisma.token.create({
     data: {
             userId: user.id,
-            accessToken: tk,
-            refreshToken: rftk,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
         },
     });
      
@@ -54,8 +54,8 @@ export async function Create(body:any) {
         id: user.id,
         username: user.username,
         email: user.email,
-        token: tk,
-        refreshToken: rftk,
+        token: accessToken,
+        refreshToken: refreshToken,
         isEmailVerified: user.isEmailVerified,
         role: user.role,
         profileUrl: user.profileUrl || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',

@@ -13,7 +13,7 @@ export const Model = new Elysia()
             token: t.String(),
             refreshToken: t.String(),
             isEmailVerified: t.Boolean(),
-            profileUrl: t.String(),
+            profileUrl: t.Nullable(t.String()),
             role: t.String()
         }),
     })

@@ -157,6 +157,6 @@ export async function generateAccessToken (userId: number,username:string,role:s
     return jwt.sign({ userId,username,role }, process.env.JWT_SECRET || "No-Way-Null_Secret", { expiresIn: "3h" });
 };
 
-export async function generateRefreshToken (userId: number,username:string,role:string) {
-    return jwt.sign({ userId,username,role }, process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret", { expiresIn: "7d" });
+export async function generateRefreshToken (userId: number) {
+    return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret", { expiresIn: "7d" });
 };
