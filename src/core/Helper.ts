@@ -3,8 +3,8 @@ import nodemailer, { SentMessageInfo } from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from "jsonwebtoken";
 const bcrypt = require('bcrypt');
-const {getStorage, ref, getDownloadURL,uploadBytesResumable} = require('firebase/storage')
-const {initializeApp} = require('firebase/app')
+const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage')
+const { initializeApp } = require('firebase/app')
 
 const prisma = new PrismaClient();
 
@@ -19,7 +19,7 @@ const serviceAccount = {
     token_uri: process.env['token_uri'],
     auth_provider_x509_cert_url: process.env['auth_provider_x509_cert_url'],
     client_x509_cert_url: process.env['client_x509_cert_url'],
-    storageBucket:process.env['storageBucket']
+    storageBucket: process.env['storageBucket']
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "No-Way-Null_Secret"
@@ -52,14 +52,14 @@ export async function hash(plainText: string, saltRounds: number = 12, miner: st
 export async function hashCompare(plainText: string, hashed: string): Promise<boolean> {
     try {
         const isMatch = await bcrypt.compare(plainText, hashed);
-        return isMatch; 
-    } catch (err:any) {
+        return isMatch;
+    } catch (err: any) {
         throw new Error('Error comparing hash: ' + err.message);
     }
 }
 export function validateEmailFormat(email: string): void {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) throw new Error('Invalid email format');    
+    if (!emailRegex.test(email)) throw new Error('Invalid email format');
 }
 
 export function validateUsername(username: string): void {
@@ -92,7 +92,7 @@ export function validateThaiIdCard(idCard: string): void {
     }
 }
 
-export async function sendEmail(to: string, option: {subject: string,html:string}): Promise<boolean> {
+export async function sendEmail(to: string, option: { subject: string, html: string }): Promise<boolean> {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -129,26 +129,26 @@ interface UploadResponse {
     downloadURLs: string[];
 }
 
-export async function fileUpload(files: File[] | undefined,RandomName?: boolean,CustomName?: string): Promise<UploadResponse> {
+export async function fileUpload(files: File[] | undefined, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
     if (!files) throw new Error('File missing');
     if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
-    
+
     const storage = getStorage();
     const downloadURLs: string[] = [];
 
     const uploadPromises = files.map(async (element) => {
-    const storageRef = ref(
-        storage,
-        `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
-    );
+        const storageRef = ref(
+            storage,
+            `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
+        );
 
-    const metadata = { contentType: element.mimetype };
+        const metadata = { contentType: element.mimetype };
 
-    const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+        const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-    downloadURLs.push(downloadURL);
-    return downloadURLs;
+        downloadURLs.push(downloadURL);
+        return downloadURLs;
     });
 
     await Promise.all(uploadPromises);
@@ -156,11 +156,11 @@ export async function fileUpload(files: File[] | undefined,RandomName?: boolean,
     return { downloadURLs };
 }
 
-export async function generateAccessToken (userId: number,username:string,role:string) {
-    return jwt.sign({ userId,username,role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });;
+export async function generateAccessToken(userId: number, username: string, role: string) {
+    return jwt.sign({ userId, username, role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });;
 };
 
-export async function generateRefreshToken (userId: number) {
+export async function generateRefreshToken(userId: number) {
     return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_TIME });
 };
 
