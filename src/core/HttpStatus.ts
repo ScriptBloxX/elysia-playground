@@ -27,3 +27,14 @@ export function HttpErrorHandle(code:string,error:any,set:any){
         }
     }
 }
+
+export function HttpSuccessHandle(data:[]|{},set:any) {
+    const createSuccessResponse = (status:number, data:[]|{}) => ({
+        status,
+        success: true,
+        duration: null,
+        response: data,
+    });
+    set.status = 200;
+    return createSuccessResponse(200, data);
+}

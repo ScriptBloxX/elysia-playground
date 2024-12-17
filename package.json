@@ -18,9 +18,11 @@
     "firebase": "^11.0.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.16",
-    "prisma": "^5.18.0"
+    "prisma": "^5.18.0",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "bun-types": "latest"
   },
   "module": "src/index.js"
