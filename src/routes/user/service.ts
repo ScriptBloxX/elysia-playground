@@ -68,7 +68,6 @@ export async function Read(params:any) {
 }
 export async function ReadAll() {
     const result = await prisma.user.findMany();
-    await prisma.$disconnect();
     return result;
 }
 
