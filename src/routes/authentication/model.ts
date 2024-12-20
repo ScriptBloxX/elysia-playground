@@ -22,4 +22,4 @@ export const Model = new Elysia()
         refreshTokenRes: t.Object({
             accessToken: t.String()
         }),
-    })
+    })  

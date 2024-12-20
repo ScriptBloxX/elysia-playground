@@ -4,7 +4,7 @@ import { Elysia, t } from 'elysia';
 import { swagger } from "@elysiajs/swagger";
 import cors from '@elysiajs/cors';
 import { rateLimit } from 'elysia-rate-limit';
-import { HttpErrorHandle, HttpSuccessHandle } from './core/HttpStatus';
+import { HttpErrorHandle } from './core/HttpStatus';
 
 const app = new Elysia();
 
@@ -23,14 +23,8 @@ app
             }),
         }),
     }),)
-    app.onRequest(({ request, set }) => {
-        (set as any).isSwagger = request.url.includes('swagger');
-    })
     .onError(({ code, error, set }) => {
         return HttpErrorHandle(code,error,set);
-    })
-    .onAfterHandle(({response,set})=>{
-        return HttpSuccessHandle(response,set);
     })
     // # ↘ Please don't edit this manually ↙ //
     .group('/api', (app) => app.use(userRoute))

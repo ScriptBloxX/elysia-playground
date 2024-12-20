@@ -38,7 +38,7 @@ export async function Login(body: any) {
         isEmailVerified: user.isEmailVerified,
         role: user.role,
         profileUrl: user.profileUrl
-    };
+    };    
 }
 
 export async function RefreshToken(body: any) {
