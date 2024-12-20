@@ -23,6 +23,9 @@ app
             }),
         }),
     }),)
+    app.onRequest(({ request, set }) => {
+        (set as any).isSwagger = request.url.includes('swagger');
+    })
     .onError(({ code, error, set }) => {
         return HttpErrorHandle(code,error,set);
     })
