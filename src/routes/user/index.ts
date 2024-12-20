@@ -1,13 +1,14 @@
 import Elysia from "elysia";
 import { Create, Delete, Read, ReadAll, Update } from "./service";
 import { Model } from "./model";
-import mw from "../../middleware/mw";
+import { auth } from "../../middleware/mw";
 
 export default new Elysia({prefix: '/user'})
     .use(Model)
-    .onBeforeHandle(mw) //midleware example
     .get('/',()=> ReadAll())
-    .get('/:id',()=> Read())
-    .post('/',({body})=> Create(body),{body: 'create',response: 'create'})
-    .patch('/',()=> Update())
-    .delete('/',()=> Delete())
+    .get('/:id',({params})=> Read(params))
+    .post('/',({body})=>Create(body),{body: 'createReq',response: 'createRes'})
+    
+    .onBeforeHandle(auth)
+    .patch('/' ,(req)=> Update(req),{body:'UpdateReq',response: 'UpdateRes'})
+    .delete('/',(req)=> Delete(req))

@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
+import jwt from "jsonwebtoken";
 const bcrypt = require('bcrypt');
-const {getStorage, ref, getDownloadURL,uploadBytesResumable} = require('firebase/storage')
-const {initializeApp} = require('firebase/app')
+const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage')
+const { initializeApp } = require('firebase/app')
 
 const prisma = new PrismaClient();
 
@@ -18,27 +19,20 @@ const serviceAccount = {
     token_uri: process.env['token_uri'],
     auth_provider_x509_cert_url: process.env['auth_provider_x509_cert_url'],
     client_x509_cert_url: process.env['client_x509_cert_url'],
-    storageBucket:process.env['storageBucket']
+    storageBucket: process.env['storageBucket']
 }
+
+const JWT_SECRET = process.env.JWT_SECRET || "No-Way-Null_Secret"
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret"
 
 initializeApp(serviceAccount);
 
-async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<T>): Promise<T> {
-    let result: T;
-    try {
-        result = await callback(prisma);
-    } finally {
-        await prisma.$disconnect();
-    }
-    return result;
-}
+export default prisma;
 
-export default executeWithPrisma;
-
-export async function hash(plainTextPassword: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
+export async function hash(plainText: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
     try {
         const salt = await bcrypt.genSalt(saltRounds)
-        const hashedPassword = await bcrypt.hash(plainTextPassword, salt)
+        const hashedPassword = await bcrypt.hash(plainText, salt)
         return hashedPassword
     } catch (err) {
         throw new Error('Error hashing password: ')
@@ -48,14 +42,14 @@ export async function hash(plainTextPassword: string, saltRounds: number = 12, m
 export async function hashCompare(plainText: string, hashed: string): Promise<boolean> {
     try {
         const isMatch = await bcrypt.compare(plainText, hashed);
-        return isMatch; 
-    } catch (err:any) {
+        return isMatch;
+    } catch (err: any) {
         throw new Error('Error comparing hash: ' + err.message);
     }
 }
 export function validateEmailFormat(email: string): void {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) throw new Error('Invalid email format');    
+    if (!emailRegex.test(email)) throw new Error('Invalid email format');
 }
 
 export function validateUsername(username: string): void {
@@ -88,7 +82,7 @@ export function validateThaiIdCard(idCard: string): void {
     }
 }
 
-export async function sendEmail(to: string, option: {subject: string,html:string}): Promise<boolean> {
+export async function sendEmail(to: string, option: { subject: string, html: string }): Promise<boolean> {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -117,38 +111,64 @@ export async function sendEmail(to: string, option: {subject: string,html:string
 }
 
 interface File {
-  originalname: string;
-  mimetype: string;
-  buffer: Buffer;
+    originalname: string;
+    mimetype: string;
+    buffer: Buffer;
 }
 interface UploadResponse {
-  downloadURLs: string[];
+    downloadURLs: string[];
 }
 
-export async function fileUpload(files: File[] | undefined,RandomName?: boolean,CustomName?: string): Promise<UploadResponse> {
-    
-  if (!files) throw new Error('File missing');
-  if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+export async function fileUpload(files: File[] | undefined, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
+    if (!files) throw new Error('File missing');
+    if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
 
-  const storage = getStorage();
-  const downloadURLs: string[] = [];
+    const storage = getStorage();
+    const downloadURLs: string[] = [];
 
-  const uploadPromises = files.map(async (element) => {
-    const storageRef = ref(
-      storage,
-      `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
-    );
+    const uploadPromises = files.map(async (element) => {
+        const storageRef = ref(
+            storage,
+            `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
+        );
 
-    const metadata = { contentType: element.mimetype };
+        const metadata = { contentType: element.mimetype };
 
-    const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    
-    downloadURLs.push(downloadURL);
-    return downloadURLs;
-  });
+        const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-  await Promise.all(uploadPromises);
+        downloadURLs.push(downloadURL);
+        return downloadURLs;
+    });
 
-  return { downloadURLs };
+    await Promise.all(uploadPromises);
+
+    return { downloadURLs };
+}
+
+export async function generateAccessToken(userId: number, username: string, role: string) {
+    return jwt.sign({ userId, username, role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });;
+};
+
+export async function generateRefreshToken(userId: number) {
+    return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_TIME });
+};
+
+export async function verifyAccessToken(token: string) {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid or expired token');
+    }
+}
+
+export async function verifyRefreshToken(refreshToken: string, userId: number) {
+    try {
+        const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as any;
+        if (decoded.userId !== userId) throw new Error('Token does not match the user');
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid or expired refresh token');
+    }
 }
