@@ -18,14 +18,20 @@ export function HttpErrorHandle(code:string,error:any,set:any){
         error_message: [message]
     });
     if (code === "UNKNOWN") {
-        if (isBadRequestError(error.message)) {
+        if (error.message === "Unauthorized") {
+            set.status = 403;
+            return createErrorResponse(403, "Unauthorized: Access is denied due to insufficient permissions.");
+        } else if (error.message === "Unauthenticated") {
+            set.status = 401;
+            return createErrorResponse(401, "Unauthenticated: You must authenticate first to access this resource.");
+        } else if (isBadRequestError(error.message)) {
             set.status = 400;
             return createErrorResponse(400, error.message);
         } else if (isServerError(error.message)) {
             set.status = 500;
-            return createErrorResponse(500, error.message);
+            return createErrorResponse(500, error.message || "Internal Server Error: An unexpected error occurred.");
         }
-    }
+    }    
 }
 
 export function HttpSuccessHandle(data:[]|{},set:any) {

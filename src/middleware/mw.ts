@@ -3,7 +3,7 @@ import { verifyAccessToken } from "../core/Helper";
 export async function auth(ctx: any) {
     const authHeader = ctx.headers['authorization'];
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) throw new Error('Unauthorized');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) throw new Error('Unauthenticated');
 
     const token = authHeader.slice(7);
     try {

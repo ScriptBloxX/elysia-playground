@@ -14,9 +14,9 @@ export async function Login(body: any) {
         }
     })
 
-    if (!user) throw new Error('Invalid username or email');
+    if (!user) throw new Error('Invalid username or password');
     const passwordMatch = await hashCompare(password, user.password)
-    if (!passwordMatch) throw new Error('Invalid password');
+    if (!passwordMatch) throw new Error('Invalid username or password');
 
     const accessToken = await generateAccessToken(user.id, user.username, user.role);
     const refreshToken = await generateRefreshToken(user.id);
