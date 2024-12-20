@@ -75,7 +75,7 @@ export async function Update(req: any) {
     if (req.body.email) validateEmailFormat(req.body.email);
     if (req.body.username) validateUsername(req.body.username);
     if (req.body.password) validatePassword(req.body.password);
-    
+
     const userId = Number(req.user.userId);
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -100,6 +100,10 @@ export async function Update(req: any) {
     return updatedUser;
 }
 
-export async function Delete() {
-    return 'Hello Delete'
+export async function Delete(req:any) {
+    await prisma.user.delete({
+        where: { id: Number(req.user.id)},
+    });
+
+    return { message: `User with id ${req.user.id} deleted successfully` };
 }

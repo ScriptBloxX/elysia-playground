@@ -11,4 +11,4 @@ export default new Elysia({prefix: '/user'})
     
     .onBeforeHandle(auth)
     .patch('/' ,(req)=> Update(req),{body:'UpdateReq',response: 'UpdateRes'})
-    .delete('/',auth,()=> Delete())
+    .delete('/',(req)=> Delete(req))
