@@ -63,6 +63,7 @@ export async function Read(params:any) {
     const user = await prisma.user.findUnique({
         where: { id: Number(params.id) },
     });
+    console.log(user)
     if (!user) throw new Error("User not found")
     return user
 }
@@ -70,11 +71,35 @@ export async function ReadAll() {
     const result = await prisma.user.findMany();
     return result;
 }
+export async function Update(req: any) {
+    if (req.body.email) validateEmailFormat(req.body.email);
+    if (req.body.username) validateUsername(req.body.username);
+    if (req.body.password) validatePassword(req.body.password);
+    
+    const userId = Number(req.user.userId);
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+    if (!user) throw new Error("User not found");
+    
+    const updatedData: any = {
+        username: req.body.username || user.username,
+        password: req.body.password ? await hash(req.body.password) : user.password,
+        email: req.body.email || user.email,
+        profileUrl: req.body.profileUrl || user.profileUrl,
+        updatedBy: req.body.updatedBy || user.updatedBy,
+    };
 
-export async function Update() {
-    console.log('print')
-    return 'Hello Update'
+    if (req.body.email && req.body.email !== user.email) updatedData.isEmailVerified = false;
+
+    const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: updatedData,
+    });
+
+    return updatedUser;
 }
+
 export async function Delete() {
     return 'Hello Delete'
 }
