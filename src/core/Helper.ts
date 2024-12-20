@@ -27,17 +27,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret
 
 initializeApp(serviceAccount);
 
-async function executeWithPrisma<T>(callback: (prisma: PrismaClient) => Promise<T>): Promise<T> {
-    let result: T;
-    try {
-        result = await callback(prisma);
-    } finally {
-        await prisma.$disconnect();
-    }
-    return result;
-}
-
-export default executeWithPrisma;
+export default prisma;
 
 export async function hash(plainText: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
     try {

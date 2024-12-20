@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client"
-import { generateAccessToken, generateRefreshToken, hashCompare, verifyRefreshToken } from "../../core/Helper";
+import prisma, { generateAccessToken, generateRefreshToken, hashCompare, verifyRefreshToken } from "../../core/Helper";
 
 export async function Login(body: any) {
     const { usernameOrEmail, password } = body
-    const prisma = new PrismaClient()
 
     const user = await prisma.user.findFirst({
         where: {
@@ -43,7 +41,6 @@ export async function Login(body: any) {
 
 export async function RefreshToken(body: any) {
     const { refreshToken } = body;
-    const prisma = new PrismaClient();
 
     const tokenRecord = await prisma.token.findFirst({
         where: { refreshToken }

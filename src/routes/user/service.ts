@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-import { generateAccessToken, generateRefreshToken, hash, validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
+import prisma, { generateAccessToken, generateRefreshToken, hash, validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
 
 export async function Create(body:any) {
     validateEmailFormat(body.email);
     validateUsername(body.username);
     validatePassword(body.password);
 
-    const prisma = new PrismaClient()
     const existingUser = await prisma.user.findFirst({
         where: {
           OR: [
@@ -31,7 +29,7 @@ export async function Create(body:any) {
             username: body.username,
             email: body.email,
             password: hashedPassword,
-            role: body.role || "user",
+            role: "user",
             isEmailVerified: false,
             profileUrl: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
             isActive: true,         
@@ -61,16 +59,19 @@ export async function Create(body:any) {
         profileUrl: user.profileUrl,
     };
 }
-export async function Read() {
-    return 'Hello Read'
+export async function Read(params:any) {
+    const user = await prisma.user.findUnique({
+        where: { id: Number(params.id) },
+    });
+    if (!user) throw new Error("User not found")
+    return user
 }
 export async function ReadAll() {
-    const prisma = new PrismaClient()
-    const result = prisma.user.findMany()
-    await prisma.$disconnect()
-
-    return result
+    const result = await prisma.user.findMany();
+    await prisma.$disconnect();
+    return result;
 }
+
 export async function Update() {
     console.log('print')
     return 'Hello Update'
