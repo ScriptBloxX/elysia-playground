@@ -61,3 +61,9 @@ export async function RefreshToken(body: any) {
 
     return { accessToken: newAccessToken };
 }
+export async function EmailVerify(params:any) {
+    
+}
+export async function SendEmailVerify(body:any){
+
+}
