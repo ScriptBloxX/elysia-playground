@@ -1,4 +1,4 @@
-import prisma, { generateAccessToken, generateRefreshToken, hash, validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
+import prisma, { generateAccessToken, generateRefreshToken, generateResetPasswordToken, hash, loadTemplate, sendEmail, validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
 
 export async function Create(body:any) {
     validateEmailFormat(body.email);
@@ -101,7 +101,27 @@ export async function Update(req: any) {
 }
 
 export async function ForgotPassword(body:any) {
-    
+    const user = await prisma.user.findUnique({
+        where: { email: body.email },
+        select: {id:true,username:true}
+    });
+    if(!user) throw new Error("User not found");
+
+    const token = await generateResetPasswordToken(user.id,body.email);
+    const personalizeTemplate = (template:string, token:string,username:string) => {
+        return template
+        .replace('{{SERVER_ENDPOINT}}', `${process.env.FRONTEND_EP}/resetpassword?token=${token}`)
+        .replace('{{USERNAME}}',username)
+        .replace('{{Expires}}',process.env.RP_TOKEN_TIME || 'no limited.')
+        .replaceAll('{{COMPANY}}',process.env.COMPANY || '');
+    };
+    const EmailForm = personalizeTemplate(await loadTemplate('ForgotPassword'), token,user.username);
+
+    await sendEmail(body.email,{
+        subject: `${process.env.COMPANY} Reset Password Request`,
+        html: EmailForm
+    })
+    return true;
 }
 export async function ResetPassword(body:any) {
     
