@@ -83,7 +83,7 @@ export function validateThaiIdCard(idCard: string): void {
     }
 }
 
-export async function sendEmail(to: string, option: { subject: string, html: string }): Promise<boolean> {
+export async function sendEmail(to: string, option: { subject: string, html: string | any }): Promise<boolean> {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
