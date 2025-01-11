@@ -16,10 +16,10 @@ export const Model = new Elysia()
             profileUrl: t.Nullable(t.String()),
             role: t.String()
         }),
-        refreshToken: t.Object({
+        refreshTokenReq: t.Object({
             refreshToken: t.String()
         }),
         refreshTokenRes: t.Object({
             accessToken: t.String()
-        }),
+        })
     })  

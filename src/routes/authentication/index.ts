@@ -6,7 +6,7 @@ import { auth } from "../../middleware/mw";
 export default new Elysia({prefix: '/authentication'})
     .use(Model)
     .post('/login', ({body}) => Login(body), {body:'loginReq',response:'loginRes'})
-    .post('/refresh-token', ({ body }) => RefreshToken(body), {body: 'refreshToken' ,response: 'refreshTokenRes'})
+    .post('/refresh-token', ({ body }) => RefreshToken(body), {body: 'refreshTokenReq' ,response: 'refreshTokenRes'})
     .get('/verify/:token',({params})=>EmailVerify(params))
     
     .onBeforeHandle(auth)

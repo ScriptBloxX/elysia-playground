@@ -17,18 +17,25 @@ export const Model = new Elysia()
             role: t.String(),
             profileUrl: t.Nullable(t.String()),
         }),
-        UpdateReq: t.Object({
+        updateReq: t.Object({
             username: t.Nullable(t.String()),
             password: t.Nullable(t.String()),
             email: t.Nullable(t.String()),
             profileUrl: t.Nullable(t.String()),
         }),
-        UpdateRes: t.Object({
+        updateRes: t.Object({
             id: t.Number(),
             username: t.String(),
             email: t.String(),
             isEmailVerified: t.Boolean(),
             profileUrl: t.Nullable(t.String()),
+        }),
+        forgotPasswordReq: t.Object({
+            email: t.String()
+        }),
+        resetPasswordReq: t.Object({
+            token: t.String(),
+            password: t.String()
         })
     })
 

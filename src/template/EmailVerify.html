@@ -35,7 +35,10 @@
             max-width: 80%;
             max-height: 100px;
         }
-
+        p {
+            font-size: 0.9rem;
+            color: #333;
+        }
         h2 {
             text-align: center;
             color: #333;
@@ -102,10 +105,10 @@
             button below to verify your email address.</p>
         <form action="{{SERVER_ENDPOINT}}" method="GET">
             <button type="submit">Verify Email Address</button>
-            <p>Expires in {{Expires}}</p>
         </form>
         <div class="message">
             <p>Please do not share this email with anyone to ensure the security of your account.</p>
+            <p>This link will expire in {{Expires}}.</p>
         </div>
     </div>
     <div class="footer">

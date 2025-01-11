@@ -100,6 +100,13 @@ export async function Update(req: any) {
     return updatedUser;
 }
 
+export async function ForgotPassword(body:any) {
+    
+}
+export async function ResetPassword(body:any) {
+    
+}
+
 export async function Delete(req:any) {
     await prisma.user.delete({
         where: { id: Number(req.user.id)},

@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const loadEmailTemplate = () => {
-    const filePath = path.resolve(__dirname, '../..', 'template', 'EmailTemplate.html');
+    const filePath = path.resolve(__dirname, '../..', 'template', 'EmailVerify.html');
     return fs.readFileSync(filePath, 'utf8'); 
 };
 const personalizeTemplate = (template:string, token:string,username:string) => {
@@ -76,6 +76,7 @@ export async function RefreshToken(body: any) {
 
     return { accessToken: newAccessToken };
 }
+
 export async function EmailVerify(params: any) {
     const verify = <JwtPayload>await verifyEmailToken(params.token);
 
