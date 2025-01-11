@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
 const bcrypt = require('bcrypt');
 const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage')
 const { initializeApp } = require('firebase/app')
@@ -25,6 +27,7 @@ const serviceAccount = {
 const JWT_SECRET = process.env.JWT_SECRET || 'No-Way-Null_Secret'
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'No-Way-Null_Secret'
 const VERIFY_EMAIL_SECRET = process.env.VERIFY_EMAIL_SECRET || 'No-Way-Null_Secret'
+const RESET_PASSWORD_SECRET = process.env.RESET_PASSWORD_SECRET || 'No-Way-Null_Secret'
 
 initializeApp(serviceAccount);
 
@@ -147,6 +150,11 @@ export async function fileUpload(files: File[] | undefined, RandomName?: boolean
     return { downloadURLs };
 }
 
+export async function loadTemplate(templateFilename:string) {
+    const filePath = path.resolve(__dirname, '..', 'template', `${templateFilename}.html`);
+    return fs.readFileSync(filePath, 'utf8'); 
+}
+
 export async function generateAccessToken(userId: number, username: string, role: string) {
     return jwt.sign({ userId, username, role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });;
 };
@@ -186,3 +194,16 @@ export async function verifyEmailToken(token: string) {
         throw new Error('Fail to verify your email, Invalid or expired token, Try again!');
     }
 };
+
+export async function generateResetPasswordToken(userId: number, email: string) {
+    return jwt.sign({ userId, email }, RESET_PASSWORD_SECRET, { expiresIn: process.env.RP_TOKEN_TIME });
+}
+
+export async function verifyResetPasswordToken(token: string) {
+    try {
+        const decoded = jwt.verify(token, RESET_PASSWORD_SECRET) as any;
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid or expired reset password token');
+    }
+}
