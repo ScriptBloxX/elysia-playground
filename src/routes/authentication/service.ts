@@ -1,4 +1,19 @@
-import prisma, { generateAccessToken, generateRefreshToken, hashCompare, verifyRefreshToken } from "../../core/Helper";
+import { JwtPayload } from "jsonwebtoken";
+import prisma, { generateAccessToken, generateEmailToken, generateRefreshToken, hashCompare, sendEmail, verifyEmailToken, verifyRefreshToken } from "../../core/Helper";
+const fs = require('fs');
+const path = require('path');
+
+const loadEmailTemplate = () => {
+    const filePath = path.resolve(__dirname, '../..', 'template', 'EmailTemplate.html');
+    return fs.readFileSync(filePath, 'utf8'); 
+};
+const personalizeTemplate = (template:string, token:string,username:string) => {
+    return template
+    .replace('{{SERVER_ENDPOINT}}', `${process.env.BACKEND_EP}/api/authentication/verify/${token}`)
+    .replace('{{USERNAME}}',username)
+    .replace('{{Expires}}',process.env.VE_TOKEN_TIME || 'no limited.')
+    .replaceAll('{{COMPANY}}',process.env.COMPANY || '');
+};
 
 export async function Login(body: any) {
     const { usernameOrEmail, password } = body
@@ -60,4 +75,41 @@ export async function RefreshToken(body: any) {
     const newAccessToken = await generateAccessToken(user.id, user.username, user.role);
 
     return { accessToken: newAccessToken };
+}
+export async function EmailVerify(params: any) {
+    const verify = <JwtPayload>await verifyEmailToken(params.token);
+
+    const user = await prisma.user.findUnique({
+        where: { id: verify.userId },
+        select: { email: true }
+    });
+
+    if (!user) throw new Error('User not found');
+    
+    if (user.email === verify.email) {
+        await prisma.user.update({
+            where: { id: verify.userId },
+            data: { isEmailVerified: true }
+        });
+        return true;
+    } else {
+        throw new Error('Email is not match!');
+    }
+}
+
+export async function SendEmailVerify(req:any){
+    const user = await prisma.user.findUnique({
+        where: { id: req.user.userId },
+        select: {username: true,email:true}
+    });
+    if(!user) throw new Error("User not found");
+
+    const token = await generateEmailToken(req.user.userId,user.email)
+    const EmailForm = personalizeTemplate(loadEmailTemplate(), token,user.username);
+
+    await sendEmail(user.email,{
+        subject: `${process.env.COMPANY} Verify Request`,
+        html: EmailForm
+    })
+    return true;
 }

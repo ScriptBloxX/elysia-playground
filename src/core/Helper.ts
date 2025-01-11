@@ -22,14 +22,15 @@ const serviceAccount = {
     storageBucket: process.env['storageBucket']
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "No-Way-Null_Secret"
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "No-Way-Null_Secret"
+const JWT_SECRET = process.env.JWT_SECRET || 'No-Way-Null_Secret'
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'No-Way-Null_Secret'
+const VERIFY_EMAIL_SECRET = process.env.VERIFY_EMAIL_SECRET || 'No-Way-Null_Secret'
 
 initializeApp(serviceAccount);
 
 export default prisma;
 
-export async function hash(plainText: string, saltRounds: number = 12, miner: string = 'b'): Promise<string> {
+export async function hash(plainText: string, saltRounds: number = Number(process.env['bcrypt_saltRounds']), miner: string = String(process.env['bcrypt_miner'])): Promise<string> {
     try {
         const salt = await bcrypt.genSalt(saltRounds)
         const hashedPassword = await bcrypt.hash(plainText, salt)
@@ -82,7 +83,7 @@ export function validateThaiIdCard(idCard: string): void {
     }
 }
 
-export async function sendEmail(to: string, option: { subject: string, html: string }): Promise<boolean> {
+export async function sendEmail(to: string, option: { subject: string, html: string | any }): Promise<boolean> {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -150,10 +151,6 @@ export async function generateAccessToken(userId: number, username: string, role
     return jwt.sign({ userId, username, role }, JWT_SECRET, { expiresIn: process.env.TOKEN_TIME });;
 };
 
-export async function generateRefreshToken(userId: number) {
-    return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_TIME });
-};
-
 export async function verifyAccessToken(token: string) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -161,7 +158,11 @@ export async function verifyAccessToken(token: string) {
     } catch (error) {
         throw new Error('Invalid or expired token');
     }
-}
+};
+
+export async function generateRefreshToken(userId: number) {
+    return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_TIME });
+};
 
 export async function verifyRefreshToken(refreshToken: string, userId: number) {
     try {
@@ -171,4 +172,17 @@ export async function verifyRefreshToken(refreshToken: string, userId: number) {
     } catch (error) {
         throw new Error('Invalid or expired refresh token');
     }
-}
+};
+
+export async function generateEmailToken(userId: number, email: string,) {
+    return jwt.sign({ userId, email }, VERIFY_EMAIL_SECRET, { expiresIn: process.env.VE_TOKEN_TIME });;
+};
+
+export async function verifyEmailToken(token: string) {
+    try {
+        const decoded = jwt.verify(token, VERIFY_EMAIL_SECRET);
+        return decoded;
+    } catch (error) {
+        throw new Error('Fail to verify your email, Invalid or expired token, Try again!');
+    }
+};

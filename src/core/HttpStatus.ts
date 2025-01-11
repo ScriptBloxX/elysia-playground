@@ -18,12 +18,12 @@ export function HttpErrorHandle(code:string,error:any,set:any){
         error_message: [message]
     });
     if (code === "UNKNOWN") {
-        if (error.message === "Unauthorized") {
+        if (error.message === "Forbidden") {
             set.status = 403;
-            return createErrorResponse(403, "Unauthorized: Access is denied due to insufficient permissions.");
-        } else if (error.message === "Unauthenticated") {
+            return createErrorResponse(403, "Forbidden: Access is denied due to insufficient permissions.");
+        } else if (error.message === "Unauthorized") {
             set.status = 401;
-            return createErrorResponse(401, "Unauthenticated: You must authenticate first to access this resource.");
+            return createErrorResponse(401, "Unauthorized: You must authenticate first to access this resource.");
         } else if (isBadRequestError(error.message)) {
             set.status = 400;
             return createErrorResponse(400, error.message);
