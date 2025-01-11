@@ -1,19 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
-import prisma, { generateAccessToken, generateEmailToken, generateRefreshToken, hashCompare, sendEmail, verifyEmailToken, verifyRefreshToken } from "../../core/Helper";
-const fs = require('fs');
-const path = require('path');
-
-const loadEmailTemplate = () => {
-    const filePath = path.resolve(__dirname, '../..', 'template', 'EmailVerify.html');
-    return fs.readFileSync(filePath, 'utf8'); 
-};
-const personalizeTemplate = (template:string, token:string,username:string) => {
-    return template
-    .replace('{{SERVER_ENDPOINT}}', `${process.env.BACKEND_EP}/api/authentication/verify/${token}`)
-    .replace('{{USERNAME}}',username)
-    .replace('{{Expires}}',process.env.VE_TOKEN_TIME || 'no limited.')
-    .replaceAll('{{COMPANY}}',process.env.COMPANY || '');
-};
+import prisma, { generateAccessToken, generateEmailToken, generateRefreshToken, hashCompare, loadTemplate, sendEmail, verifyEmailToken, verifyRefreshToken } from "../../core/Helper";
 
 export async function Login(body: any) {
     const { usernameOrEmail, password } = body
@@ -101,12 +87,20 @@ export async function EmailVerify(params: any) {
 export async function SendEmailVerify(req:any){
     const user = await prisma.user.findUnique({
         where: { id: req.user.userId },
-        select: {username: true,email:true}
+        select: {username: true,email:true,isEmailVerified:true}
     });
     if(!user) throw new Error("User not found");
+    if(user.isEmailVerified) throw new Error("This email is already verified");
 
-    const token = await generateEmailToken(req.user.userId,user.email)
-    const EmailForm = personalizeTemplate(loadEmailTemplate(), token,user.username);
+    const token = await generateEmailToken(req.user.userId,user.email);
+    const personalizeTemplate = (template:string, token:string,username:string) => {
+        return template
+        .replace('{{SERVER_ENDPOINT}}', `${process.env.BACKEND_EP}/api/authentication/verify/${token}`)
+        .replace('{{USERNAME}}',username)
+        .replace('{{Expires}}',process.env.VE_TOKEN_TIME || 'no limited.')
+        .replaceAll('{{COMPANY}}',process.env.COMPANY || '');
+    };
+    const EmailForm = personalizeTemplate(await loadTemplate('EmailVerify'), token,user.username);
 
     await sendEmail(user.email,{
         subject: `${process.env.COMPANY} Verify Request`,
