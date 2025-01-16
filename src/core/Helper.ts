@@ -123,7 +123,7 @@ interface UploadResponse {
     downloadURLs: string[];
 }
 
-export async function fileUpload(files: File[] | undefined, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
+export async function fileUpload(storage_:string,files: File[] | undefined, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
     if (!files) throw new Error('File missing');
     if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
 
@@ -140,7 +140,7 @@ export async function fileUpload(files: File[] | undefined, RandomName?: boolean
     const uploadPromises = files.map(async (element) => {
         const storageRef = ref(
             storage,
-            `image/${RandomName ? uuidv4() : CustomName || element.originalname}`
+            `${storage_}/${RandomName ? uuidv4() : CustomName || element.originalname}`
         );
 
         const metadata = { contentType: element.mimetype };
