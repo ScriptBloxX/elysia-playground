@@ -127,6 +127,13 @@ export async function fileUpload(files: File[] | undefined, RandomName?: boolean
     if (!files) throw new Error('File missing');
     if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
 
+    const imageMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml'];
+    const invalidFiles = files.filter(file => !imageMimes.includes(file.mimetype));
+    
+    if (invalidFiles.length > 0) {
+        throw new Error('Only image files are allowed');
+    }
+
     const storage = getStorage();
     const downloadURLs: string[] = [];
 
