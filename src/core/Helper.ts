@@ -116,20 +116,20 @@ export async function sendEmail(to: string, option: { subject: string, html: str
 
 interface File {
     originalname: string;
-    mimetype: string;
-    buffer: Buffer;
+    type?:string|any;
 }
 interface UploadResponse {
     downloadURLs: string[];
 }
 
-export async function fileUpload(storage_:string,files: File[] | undefined, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
-    if (!files) throw new Error('File missing');
-    if (files.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+export async function fileUpload(storage_:string,files_: File[] | any, RandomName?: boolean, CustomName?: string): Promise<UploadResponse> {
+    if (!files_) throw new Error('File missing');
+    if (files_.length > 1 && CustomName) throw new Error('Custom name can only be used with a single file');
+    const files = Array.isArray(files_) ? files_ : [files_];
+    const imageMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml','undefined'];
 
-    const imageMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml'];
-    const invalidFiles = files.filter(file => !imageMimes.includes(file.mimetype));
-    
+    const invalidFiles = files.filter(file => !imageMimes.includes(file.type));
+
     if (invalidFiles.length > 0) {
         throw new Error('Only image files are allowed');
     }
@@ -140,18 +140,17 @@ export async function fileUpload(storage_:string,files: File[] | undefined, Rand
     const uploadPromises = files.map(async (element) => {
         const storageRef = ref(
             storage,
-            `${storage_}/${RandomName ? uuidv4() : CustomName || element.originalname}`
+            `${storage_}/${RandomName ? uuidv4() : CustomName || element.name}`
         );
+        const metadata = { contentType: element.type };
 
-        const metadata = { contentType: element.mimetype };
-
-        const snapshot = await uploadBytesResumable(storageRef, element.buffer, metadata);
+        const snapshot = await uploadBytesResumable(storageRef, Buffer.from(await element.arrayBuffer()), metadata);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
         downloadURLs.push(downloadURL);
         return downloadURLs;
     });
-
+    
     await Promise.all(uploadPromises);
 
     return { downloadURLs };

@@ -1,3 +1,4 @@
+import fileRoute from './routes/file';
 import authenticationRoute from './routes/authentication';
 import userRoute from './routes/user';
 import { Elysia, t } from 'elysia';
@@ -29,4 +30,4 @@ app
     // # ↘ Please don't edit this manually ↙ //
     .group('/api', (app) => app.use(userRoute))
     .group('/api', (app) => app.use(authenticationRoute))
-
+    .group('/api', (app) => app.use(fileRoute))
