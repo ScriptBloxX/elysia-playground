@@ -9,7 +9,7 @@ export default new Elysia({prefix: '/user'})
     .get('/:id',({params})=> Read(params))
     .post('/',({body})=>Create(body),{body: 'createReq',response: 'createRes'})
     .post('/forgot-password',({body})=>ForgotPassword(body), {body:'forgotPasswordReq'})
-    .patch('/reset-password',({body})=>ResetPassword(body),{body:'resetPasswordReq'})
+    .patch('/reset-password',(req)=>ResetPassword(req),{body:'resetPasswordReq'})
 
     .onBeforeHandle(auth)
     .patch('/' ,(req)=> Update(req),{body:'updateReq',response: 'updateRes'})

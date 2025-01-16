@@ -1,4 +1,4 @@
-import prisma, { generateAccessToken, generateRefreshToken, generateResetPasswordToken, hash, loadTemplate, sendEmail, validateEmailFormat, validatePassword, validateUsername } from "../../core/Helper";
+import prisma, { generateAccessToken, generateRefreshToken, generateResetPasswordToken, hash, loadTemplate, sendEmail, validateEmailFormat, validatePassword, validateUsername, verifyResetPasswordToken } from "../../core/Helper";
 
 export async function Create(body: any) {
     validateEmailFormat(body.email);
@@ -119,7 +119,6 @@ export async function Update(req: any) {
         where: { id: userId },
         data: updatedData,
     });
-
     return updatedUser;
 }
 
@@ -146,8 +145,23 @@ export async function ForgotPassword(body: any) {
     })
     return true;
 }
-export async function ResetPassword(body: any) {
+export async function ResetPassword(req: any) {
+    const vrpt = await verifyResetPasswordToken(req.body.token);
+    validatePassword(req.body.password);
+    
+    const updatedData: any = {
+        password: await hash(req.body.password),
+    };
 
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id: vrpt.userId },
+            data: updatedData,
+        });
+        return updatedUser;
+    } catch (error) {
+        throw new Error("User not found");
+    }
 }
 
 export async function Delete(req: any) {
