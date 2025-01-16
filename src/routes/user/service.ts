@@ -113,7 +113,7 @@ export async function Update(req: any) {
         updatedBy: req.body.updatedBy || user.updatedBy,
     };
 
-    if (req.body.email !== user.email) updatedData.isEmailVerified = false;
+    if (req.body.email && req.body.email !== user.email) updatedData.isEmailVerified = false;
 
     const updatedUser = await prisma.user.update({
         where: { id: userId },
